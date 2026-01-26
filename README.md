@@ -7,6 +7,8 @@
 
 A small project to check websites for SEO suitability.
 
+[Website](https://java-project-72-dckw.onrender.com/)
+
 ### Running the tool:
 
 If the distribution is not built yet, run:
