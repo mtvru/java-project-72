@@ -8,6 +8,7 @@ plugins {
     id("com.github.ben-manes.versions") version "0.53.0"
     id("org.sonarqube") version "7.0.1.6134"
     id("checkstyle")
+    id("com.gradleup.shadow") version "9.3.0"
 }
 
 group = "hexlet.code"
@@ -40,9 +41,10 @@ jacoco {
 }
 
 dependencies {
-    implementation("info.picocli:picocli:4.7.7")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.18.1")
-    annotationProcessor("info.picocli:picocli-codegen:4.7.7")
+    implementation("io.javalin:javalin:6.1.3")
+    implementation("org.slf4j:slf4j-simple:2.0.7")
+//    implementation("io.javalin:javalin-rendering:6.1.3")
+//    implementation("org.apache.commons:commons-lang3:3.14.0")
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
