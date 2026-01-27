@@ -1,5 +1,7 @@
+@import hexlet.code.dto.BasePage
 @import gg.jte.Content
 @param Content content
+@param BasePage page = null
 
 <!doctype html>
 <html lang="en">
@@ -12,9 +14,20 @@
 <body>
     <div class="container">
         <header class="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
-            @template.layout.header()
+            @template.layout.header(page=page)
         </header>
         <main>
+            @if(page != null && page.getFlash() != null)
+                <div class="alert alert-${page.getFlashType()} alert-dismissible" role="alert">
+                    ${page.getFlash()}
+                    <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="alert"
+                            aria-label="Close">
+                    </button>
+                </div>
+            @endif
             ${content}
         </main>
         <footer class="py-3 my-4 border-top">
