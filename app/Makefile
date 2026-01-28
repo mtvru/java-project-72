@@ -10,6 +10,9 @@ build:
 test:
 	./gradlew clean test
 
+run:
+	DATABASE_URL="jdbc:h2:mem:page_analyzer;DB_CLOSE_DELAY=-1" ./gradlew run
+
 report:
 	./gradlew jacocoTestReport
 

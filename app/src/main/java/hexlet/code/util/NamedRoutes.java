@@ -1,6 +1,10 @@
 package hexlet.code.util;
 
-public class NamedRoutes {
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public  final class NamedRoutes {
     public static String homePath() {
         return "/";
     }

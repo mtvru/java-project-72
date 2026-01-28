@@ -7,6 +7,8 @@ import io.javalin.Javalin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sql.DataSource;
+
 public final class App {
     private static final Logger log = LoggerFactory.getLogger(App.class);
 
@@ -14,8 +16,17 @@ public final class App {
      * @param args command line arguments
      */
     public static void main(String[] args) {
+        String dbUrl = AppConfig.getDatabaseUrl();
+
+        if (dbUrl == null || dbUrl.isBlank()) {
+            log.error(AppConfig.DATABASE_URL + " is required!");
+            System.exit(1);
+        }
+
         try {
-            Javalin app = JavalinFactory.createApp();
+            DataSource dataSource = DataSourceFactory.createDataSource();
+            DatabaseInitializer.runMigrations(dataSource);
+            Javalin app = JavalinFactory.createApp(dataSource);
             app.start(AppConfig.getPort());
         } catch (Exception e) {
             log.error("Fatal error: ", e);

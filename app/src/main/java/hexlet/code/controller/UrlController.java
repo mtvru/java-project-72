@@ -21,8 +21,14 @@ import java.util.List;
 import static io.javalin.rendering.template.TemplateUtil.model;
 
 public class UrlController {
-    public static void index(Context ctx) throws SQLException {
-        List<Url> urls = UrlRepository.getEntities();
+    private final UrlRepository urlRepository;
+
+    public UrlController(UrlRepository urlRepository) {
+        this.urlRepository = urlRepository;
+    }
+
+    public void index(Context ctx) throws SQLException {
+        List<Url> urls = this.urlRepository.findAll();
         UrlsPage page = new UrlsPage(urls);
         page.setPath(ctx.path());
         page.setFlash(ctx.consumeSessionAttribute(BasePage.FLASH_KEY));
@@ -30,15 +36,15 @@ public class UrlController {
         ctx.render("urls/index.jte", model("page", page));
     }
 
-    public static void show(Context ctx) throws SQLException {
+    public void show(Context ctx) throws SQLException {
         Long id = ctx.pathParamAsClass("id", Long.class).get();
-        Url url = UrlRepository.find(id)
+        Url url = this.urlRepository.find(id)
                 .orElseThrow(() -> new NotFoundResponse("Url with id = " + id + " not found"));
         UrlPage page = new UrlPage(url);
         ctx.render("urls/show.jte", model("page", page));
     }
 
-    public static void create(Context ctx) throws SQLException {
+    public void create(Context ctx) throws SQLException {
         try {
             String urlFormParam = ctx.formParamAsClass("url", String.class)
                     .check(value -> value != null && !value.isBlank(), "Invalid URL.")
@@ -46,7 +52,7 @@ public class UrlController {
             URI uri = new URI(urlFormParam);
             URL urlParam = uri.toURL();
             Url url = new Url(urlParam.getProtocol() + "://" + urlParam.getHost());
-            UrlRepository.save(url);
+            this.urlRepository.save(url);
             ctx.sessionAttribute(BasePage.FLASH_KEY, "Page has been added successfully.");
             ctx.sessionAttribute(BasePage.FLASH_TYPE_KEY, BasePage.FLASH_TYPE_SUCCESS);
             ctx.redirect(NamedRoutes.urlsPath());
