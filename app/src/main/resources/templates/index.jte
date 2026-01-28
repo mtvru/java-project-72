@@ -15,7 +15,7 @@ content = @`
                         <input
                                 id="url-input"
                                 type="text"
-                                name="name"
+                                name="url"
                                 class="form-control"
                                 placeholder="Link"
                                 required

@@ -40,10 +40,10 @@ public class UrlController {
 
     public static void create(Context ctx) throws SQLException {
         try {
-            String name = ctx.formParamAsClass("name", String.class)
+            String urlFormParam = ctx.formParamAsClass("url", String.class)
                     .check(value -> value != null && !value.isBlank(), "Invalid URL.")
                     .get();
-            URI uri = new URI(name);
+            URI uri = new URI(urlFormParam);
             URL urlParam = uri.toURL();
             Url url = new Url(urlParam.getProtocol() + "://" + urlParam.getHost());
             UrlRepository.save(url);
