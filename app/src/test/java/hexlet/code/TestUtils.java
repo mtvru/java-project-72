@@ -11,7 +11,7 @@ import java.sql.SQLException;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TestUtils {
     public static void clearTables(DataSource ds) throws SQLException {
-        String sql = "TRUNCATE TABLE urls RESTART IDENTITY CASCADE";
+        String sql = "TRUNCATE TABLE urls RESTART IDENTITY";
         try (
                 Connection conn = ds.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)

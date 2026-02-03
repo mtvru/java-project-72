@@ -47,7 +47,6 @@ dependencies {
     implementation("io.javalin:javalin-rendering:6.7.0")
     implementation("io.javalin:javalin-bundle:6.7.0")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.21.0")
-    implementation("org.slf4j:slf4j-simple:2.0.17")
     implementation("gg.jte:jte:3.2.2")
 //    implementation("org.apache.commons:commons-lang3:3.14.0")
     implementation("com.h2database:h2:2.4.240")
