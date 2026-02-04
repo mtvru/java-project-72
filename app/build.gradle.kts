@@ -52,10 +52,12 @@ dependencies {
     implementation("com.h2database:h2:2.4.240")
     implementation("org.postgresql:postgresql:42.7.9")
     implementation("com.zaxxer:HikariCP:7.0.2")
+    implementation("com.konghq:unirest-java:3.14.1")
 
     testImplementation("org.assertj:assertj-core:3.27.7")
     testImplementation(platform("org.junit:junit-bom:6.0.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("com.squareup.okhttp3:mockwebserver3:5.3.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
