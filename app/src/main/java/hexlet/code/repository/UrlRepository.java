@@ -3,12 +3,15 @@ package hexlet.code.repository;
 import hexlet.code.model.Url;
 
 import javax.sql.DataSource;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-public class UrlRepository extends BaseRepository {
+public class UrlRepository extends BaseRepository<Url> {
     private static final String COLUMN_NAME = "name";
 
     public UrlRepository(DataSource dataSource) {
@@ -35,53 +38,33 @@ public class UrlRepository extends BaseRepository {
         }
     }
 
-    public Optional<Url> find(Long id) throws SQLException {
-        String sql = "SELECT * FROM " + this.getTableName() + " WHERE " + COLUMN_ID + " = ?";
-        try (
-                Connection conn = getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)
-        ) {
-            stmt.setLong(1, id);
-            try (ResultSet resultSet = stmt.executeQuery()) {
-                if (resultSet.next()) {
-                    Url url = this.mapRow(resultSet);
-                    return Optional.of(url);
-                }
-                return Optional.empty();
-            }
-        }
-    }
-
     public List<Url> findAll() throws SQLException {
         String sql = "SELECT * FROM " + this.getTableName() + " ORDER BY " + COLUMN_CREATED_AT + " DESC";
         try (
                 Connection conn = getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)
+                Statement stmt = conn.createStatement();
+                ResultSet resultSet = stmt.executeQuery(sql)
         ) {
-            try (ResultSet resultSet = stmt.executeQuery()) {
-                List<Url> result = new ArrayList<>();
-                while (resultSet.next()) {
-                    Url url = this.mapRow(resultSet);
-                    result.add(url);
-                }
-                return result;
+            List<Url> result = new ArrayList<>();
+            while (resultSet.next()) {
+                Url url = this.mapRow(resultSet);
+                result.add(url);
             }
+            return result;
         }
     }
 
     @Override
-    protected String getTableName() {
-        return "urls";
-    }
-
-    private Url mapRow(ResultSet resultSet) throws SQLException {
-        Long id = resultSet.getLong(COLUMN_ID);
-        String name = resultSet.getString(COLUMN_NAME);
-        Timestamp createdAt = resultSet.getTimestamp(COLUMN_CREATED_AT);
-        Url url = new Url(name);
-        url.setId(id);
-        url.setCreatedAt(createdAt);
+    protected Url mapRow(ResultSet resultSet) throws SQLException {
+        Url url = new Url(resultSet.getString(COLUMN_NAME));
+        url.setId(resultSet.getLong(COLUMN_ID));
+        url.setCreatedAt(resultSet.getTimestamp(COLUMN_CREATED_AT));
 
         return url;
+    }
+
+    @Override
+    public String getTableName() {
+        return "urls";
     }
 }

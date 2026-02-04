@@ -3,17 +3,39 @@ package hexlet.code.repository;
 import lombok.AllArgsConstructor;
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Optional;
 
 @AllArgsConstructor
-abstract public class BaseRepository {
+abstract public class BaseRepository<T> {
     protected static final String COLUMN_ID = "id";
     protected static final String COLUMN_CREATED_AT = "created_at";
     protected final DataSource dataSource;
+
+    public Optional<T> find(Long id) throws SQLException {
+        String sql = "SELECT * FROM " + this.getTableName() + " WHERE " + COLUMN_ID + " = ?";
+        try (
+                Connection conn = getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)
+        ) {
+            stmt.setLong(1, id);
+            try (ResultSet resultSet = stmt.executeQuery()) {
+                if (resultSet.next()) {
+                    return Optional.of(this.mapRow(resultSet));
+                }
+                return Optional.empty();
+            }
+        }
+    }
 
     protected Connection getConnection() throws SQLException {
         return dataSource.getConnection();
     }
 
-    abstract protected String getTableName();
+    public abstract String getTableName();
+
+    protected abstract T mapRow(ResultSet rs) throws SQLException;
+
 }

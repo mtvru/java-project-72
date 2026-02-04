@@ -19,7 +19,7 @@ public final class App {
         String dbUrl = AppConfig.getDatabaseUrl();
 
         if (dbUrl == null || dbUrl.isBlank()) {
-            log.error(AppConfig.DATABASE_URL + " is required!");
+            log.error(AppConfig.KEY_DATABASE_URL + " is required!");
             System.exit(1);
         }
 

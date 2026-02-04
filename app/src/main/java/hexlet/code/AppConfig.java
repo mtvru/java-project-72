@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class AppConfig {
     public static String ENV_DEV = "development";
-    public static String DATABASE_URL = "DATABASE_URL";
+    public static String KEY_DATABASE_URL = "DATABASE_URL";
 
     public static int getPort() {
         String port = System.getenv().getOrDefault("PORT", "7070");
@@ -14,10 +14,15 @@ public final class AppConfig {
     }
 
     public static String getEnv() {
-        return System.getenv().getOrDefault("APP_ENV", "development");
+        return System.getenv().getOrDefault("APP_ENV", ENV_DEV);
     }
 
     public static String getDatabaseUrl() {
-        return System.getenv(DATABASE_URL);
+        return System.getenv(KEY_DATABASE_URL);
+    }
+
+    public static int getMaximumPoolSize() {
+        String size = System.getenv().getOrDefault("APP_ENV", "25");
+        return Integer.parseInt(size);
     }
 }

@@ -53,6 +53,7 @@ dependencies {
     implementation("org.postgresql:postgresql:42.7.9")
     implementation("com.zaxxer:HikariCP:7.0.2")
     implementation("com.konghq:unirest-java:3.14.1")
+    implementation("org.jsoup:jsoup:1.18.3")
 
     testImplementation("org.assertj:assertj-core:3.27.7")
     testImplementation(platform("org.junit:junit-bom:6.0.2"))
