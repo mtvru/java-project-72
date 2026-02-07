@@ -30,7 +30,7 @@ public class UrlRepository extends BaseRepository<Url> {
             preparedStatement.executeUpdate();
             try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
-                    url.setId(generatedKeys.getLong(1));
+                    url.assignId(generatedKeys.getLong(1));
                 } else {
                     throw new SQLException("DB have not returned an id after saving an entity");
                 }
@@ -56,9 +56,11 @@ public class UrlRepository extends BaseRepository<Url> {
 
     @Override
     protected Url mapRow(ResultSet resultSet) throws SQLException {
-        Url url = new Url(resultSet.getString(COLUMN_NAME));
-        url.setId(resultSet.getLong(COLUMN_ID));
-        url.setCreatedAt(resultSet.getTimestamp(COLUMN_CREATED_AT));
+        Url url = new Url(
+                resultSet.getString(COLUMN_NAME),
+                resultSet.getTimestamp(COLUMN_CREATED_AT)
+        );
+        url.assignId(resultSet.getLong(COLUMN_ID));
 
         return url;
     }

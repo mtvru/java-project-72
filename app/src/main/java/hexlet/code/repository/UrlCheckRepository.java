@@ -1,8 +1,6 @@
 package hexlet.code.repository;
 
-import hexlet.code.model.Url;
 import hexlet.code.model.UrlCheck;
-
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,10 +10,8 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class UrlCheckRepository extends BaseRepository<UrlCheck> {
     private static final String COLUMN_URL_ID = "url_id";
@@ -48,7 +44,7 @@ public class UrlCheckRepository extends BaseRepository<UrlCheck> {
 
             try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
-                    urlCheck.setId(generatedKeys.getLong(1));
+                    urlCheck.assignId(generatedKeys.getLong(1));
                 } else {
                     throw new SQLException("DB have not returned an id after saving an entity");
                 }
@@ -75,16 +71,11 @@ public class UrlCheckRepository extends BaseRepository<UrlCheck> {
         }
     }
 
-    public Map<Long, UrlCheck> findLatestUrlChecksByUrls(List<Url> urls) throws SQLException {
-        if (urls.isEmpty()) {
-            return Collections.emptyMap();
-        }
-        String ids = urls.stream()
-                .map(url -> String.valueOf(url.getId()))
-                .collect(Collectors.joining(","));
+    public Map<Long, UrlCheck> findLatestUrlChecksByUrls(Long fromUrlId, Long toUrlId) throws SQLException {
         String sql = String.format(
-                "SELECT DISTINCT ON (%s) * FROM %s WHERE %s IN (%s) ORDER BY %s, %s DESC",
-                COLUMN_URL_ID, this.getTableName(), COLUMN_URL_ID, ids, COLUMN_URL_ID, COLUMN_ID
+                "SELECT DISTINCT ON (%s) * FROM %s WHERE %s >= %s and %s <= %s ORDER BY %s, %s DESC",
+                COLUMN_URL_ID, this.getTableName(), COLUMN_URL_ID, fromUrlId, COLUMN_URL_ID, toUrlId, COLUMN_URL_ID,
+                COLUMN_ID
         );
         try (
                 Connection conn = this.dataSource.getConnection();
@@ -102,14 +93,15 @@ public class UrlCheckRepository extends BaseRepository<UrlCheck> {
 
     @Override
     protected UrlCheck mapRow(ResultSet resultSet) throws SQLException {
-        UrlCheck urlCheck = new UrlCheck();
-        urlCheck.setId(resultSet.getLong(COLUMN_ID));
-        urlCheck.setUrlId(resultSet.getLong(COLUMN_URL_ID));
-        urlCheck.setStatusCode(resultSet.getObject(COLUMN_STATUS_CODE, Integer.class));
-        urlCheck.setTitle(resultSet.getString(COLUMN_TITLE));
-        urlCheck.setH1(resultSet.getString(COLUMN_H1));
-        urlCheck.setDescription(resultSet.getString(COLUMN_DESCRIPTION));
-        urlCheck.setCreatedAt(resultSet.getTimestamp(COLUMN_CREATED_AT));
+        UrlCheck urlCheck = new UrlCheck(
+            resultSet.getLong(COLUMN_URL_ID),
+            resultSet.getObject(COLUMN_STATUS_CODE, Integer.class),
+            resultSet.getString(COLUMN_TITLE),
+            resultSet.getString(COLUMN_H1),
+            resultSet.getString(COLUMN_DESCRIPTION),
+            resultSet.getTimestamp(COLUMN_CREATED_AT)
+        );
+        urlCheck.assignId(resultSet.getLong(COLUMN_ID));
         return urlCheck;
     }
 

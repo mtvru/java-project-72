@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -25,5 +27,24 @@ public class TestUtils {
             stmt.addBatch("SET REFERENTIAL_INTEGRITY TRUE");
             stmt.executeBatch();
         }
+    }
+
+    public static long insertLocalhostToUrl(DataSource ds) throws SQLException {
+        String sql = """
+        INSERT INTO urls (name, created_at)
+        VALUES ('http://somehost:7171', CURRENT_TIMESTAMP)
+        """;
+        try (
+                Connection conn = ds.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
+        ) {
+            stmt.executeUpdate();
+            try (ResultSet rs = stmt.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
+            }
+        }
+        throw new SQLException("Failed to insert test URL");
     }
 }

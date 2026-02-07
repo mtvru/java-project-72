@@ -51,7 +51,7 @@ content = @`
             </tr>
             </thead>
             <tbody>
-                @for(UrlCheck check : page.getUrlChecks())
+                @for(UrlCheck check : page.getUrl().getUrlChecks())
                     <tr>
                         <td>${check.getId()}</td>
                         <td>${check.getStatusCode()}</td>

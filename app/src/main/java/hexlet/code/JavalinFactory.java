@@ -7,6 +7,7 @@ import hexlet.code.controller.HomeController;
 import hexlet.code.controller.UrlController;
 import hexlet.code.repository.UrlCheckRepository;
 import hexlet.code.repository.UrlRepository;
+import hexlet.code.service.UrlService;
 import hexlet.code.util.NamedRoutes;
 import io.javalin.Javalin;
 import io.javalin.rendering.template.JavalinJte;
@@ -29,7 +30,8 @@ public class JavalinFactory {
         HomeController homeController = new HomeController();
         UrlRepository urlRepository = new UrlRepository(dataSource);
         UrlCheckRepository urlCheckRepository = new UrlCheckRepository(dataSource);
-        UrlController urlController = new UrlController(urlRepository, urlCheckRepository);
+        UrlService urlService = new UrlService(urlRepository, urlCheckRepository);
+        UrlController urlController = new UrlController(urlService);
         app.get(NamedRoutes.homePath(), homeController::index);
         app.get(NamedRoutes.urlsPath(), urlController::index);
         app.get(NamedRoutes.urlPath("{id}"), urlController::show);
@@ -37,7 +39,7 @@ public class JavalinFactory {
         app.post(NamedRoutes.urlChecksPath("{id}"), urlController::check);
         app.exception(SQLException.class, (e, ctx) -> {
             log.error(e.getMessage(), e);
-            ctx.status(500).result("Internal server error.");
+            ctx.status(500).result("DB connection error.");
         });
         return app;
     }

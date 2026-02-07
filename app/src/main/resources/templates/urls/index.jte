@@ -30,17 +30,13 @@ content = @`
                         <a href="${NamedRoutes.urlPath(url.getId())}">${url.getName()}</a>
                     </td>
                     <td>
-                        @if(page.getLatestUrlChecks().containsKey(url.getId()))
-                            ${page.getLatestUrlChecks().get(url.getId()).getCreatedAt()
-                                .toInstant()
-                                .atZone(ZoneId.systemDefault())
-                                .format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG))}
-                        @endif
+                        ${url.getLatestUrlCheck().map(c -> c.getCreatedAt()
+                            .toInstant()
+                            .atZone(ZoneId.systemDefault())
+                            .format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG))).orElse(null)}
                     </td>
                     <td>
-                        @if(page.getLatestUrlChecks().containsKey(url.getId()))
-                            ${page.getLatestUrlChecks().get(url.getId()).getStatusCode()}
-                        @endif
+                        ${url.getLatestUrlCheck().map(c -> c.getStatusCode()).orElse(null)}
                     </td>
                 </tr>
             @endfor
