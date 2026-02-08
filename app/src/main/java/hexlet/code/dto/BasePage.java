@@ -6,9 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class BasePage {
-    public static final String FLASH_TYPE_SUCCESS = "success";
-    public static final String FLASH_TYPE_INFO = "info";
-    public static final String FLASH_TYPE_DANGER = "danger";
     public static final String FLASH_KEY = "flash";
     public static final String FLASH_TYPE_KEY = "flashType";
 

@@ -22,7 +22,7 @@ public final class AppConfig {
     }
 
     public static int getMaximumPoolSize() {
-        String size = System.getenv().getOrDefault("APP_ENV", "25");
+        String size = System.getenv().getOrDefault("MAX_POOL_SIZE", "10");
         return Integer.parseInt(size);
     }
 }

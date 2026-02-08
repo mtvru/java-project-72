@@ -1,5 +1,6 @@
 package hexlet.code.service;
 
+import hexlet.code.exception.IncorrectUrlException;
 import hexlet.code.model.Url;
 import hexlet.code.model.UrlCheck;
 import hexlet.code.repository.UrlCheckRepository;
@@ -7,6 +8,7 @@ import hexlet.code.repository.UrlRepository;
 import io.javalin.http.NotFoundResponse;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
+import kong.unirest.UnirestException;
 import lombok.AllArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -30,9 +32,7 @@ public final class UrlService {
         if (urls.isEmpty()) {
             return Collections.emptyList();
         }
-        Long firstId = urls.getFirst().getId();
-        Long lastId = urls.getLast().getId();
-        Map<Long, UrlCheck> latestUrlChecks = this.urlCheckRepository.findLatestUrlChecksByUrls(firstId, lastId);
+        Map<Long, UrlCheck> latestUrlChecks = this.urlCheckRepository.findLatestUrlChecksByUrls(urls);
         for (Url url : urls) {
             UrlCheck latestCheck = latestUrlChecks.get(url.getId());
             url.addUrlCheck(latestCheck);
@@ -57,23 +57,27 @@ public final class UrlService {
             this.urlRepository.save(url);
             return url;
         } catch (MalformedURLException | URISyntaxException | IllegalArgumentException e) {
-            throw new IllegalArgumentException("Incorrect URL");
+            throw new IncorrectUrlException();
         }
     }
 
     public UrlCheck checkUrl(Long urlId) throws SQLException {
         Url url = this.urlRepository.find(urlId)
                 .orElseThrow(() -> new NotFoundResponse("Url with id = " + urlId + " not found"));
-        HttpResponse<String> response = Unirest.get(url.getName()).asString();
-        Integer statusCode = response.getStatus();
-        Document doc = Jsoup.parse(response.getBody());
-        String title = doc.title();
-        Element h1Element = doc.selectFirst("h1");
-        String h1 = h1Element != null ? h1Element.text() : "";
-        Element descriptionElement = doc.selectFirst("meta[name=description]");
-        String description = descriptionElement != null ? descriptionElement.attr("content") : "";
-        UrlCheck urlCheck = new UrlCheck(url.getId(), statusCode, title, h1, description);
-        this.urlCheckRepository.save(urlCheck);
-        return urlCheck;
+        try {
+            HttpResponse<String> response = Unirest.get(url.getName()).asString();
+            Integer statusCode = response.getStatus();
+            Document doc = Jsoup.parse(response.getBody());
+            String title = doc.title();
+            Element h1Element = doc.selectFirst("h1");
+            String h1 = h1Element != null ? h1Element.text() : "";
+            Element descriptionElement = doc.selectFirst("meta[name=description]");
+            String description = descriptionElement != null ? descriptionElement.attr("content") : "";
+            UrlCheck urlCheck = new UrlCheck(url.getId(), statusCode, title, h1, description);
+            this.urlCheckRepository.save(urlCheck);
+            return urlCheck;
+        } catch (UnirestException e) {
+            throw new IncorrectUrlException();
+        }
     }
 }

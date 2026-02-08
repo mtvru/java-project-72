@@ -59,6 +59,7 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:6.0.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("com.squareup.okhttp3:mockwebserver3:5.3.0")
+    testImplementation("com.squareup.okhttp3:okhttp-java-net-cookiejar:5.3.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 

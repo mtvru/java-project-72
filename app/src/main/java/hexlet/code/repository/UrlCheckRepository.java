@@ -1,5 +1,6 @@
 package hexlet.code.repository;
 
+import hexlet.code.model.Url;
 import hexlet.code.model.UrlCheck;
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -12,6 +13,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
+import java.util.stream.Collectors;
 
 public final class UrlCheckRepository extends BaseRepository<UrlCheck> {
     private static final String COLUMN_URL_ID = "url_id";
@@ -74,11 +77,16 @@ public final class UrlCheckRepository extends BaseRepository<UrlCheck> {
         }
     }
 
-    public Map<Long, UrlCheck> findLatestUrlChecksByUrls(Long fromUrlId, Long toUrlId) throws SQLException {
+    public Map<Long, UrlCheck> findLatestUrlChecksByUrls(List<Url> urls) throws SQLException {
+        if (urls.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        String idList = urls.stream()
+                .map(url -> String.valueOf(url.getId()))
+                .collect(Collectors.joining(", "));
         String sql = String.format(
-                "SELECT DISTINCT ON (%s) * FROM %s WHERE %s >= %s and %s <= %s ORDER BY %s, %s DESC",
-                COLUMN_URL_ID, this.getTableName(), COLUMN_URL_ID, fromUrlId, COLUMN_URL_ID, toUrlId, COLUMN_URL_ID,
-                COLUMN_ID);
+                "SELECT * FROM %s WHERE id IN (SELECT MAX(id) FROM %s GROUP BY %s) AND %s IN (%s)",
+                this.getTableName(), this.getTableName(), COLUMN_URL_ID, COLUMN_URL_ID, idList);
         try (
                 Connection conn = getConnection();
                 Statement stmt = conn.createStatement();

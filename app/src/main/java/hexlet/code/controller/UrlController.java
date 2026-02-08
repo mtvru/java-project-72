@@ -3,8 +3,10 @@ package hexlet.code.controller;
 import hexlet.code.dto.BasePage;
 import hexlet.code.dto.urls.UrlPage;
 import hexlet.code.dto.urls.UrlsPage;
+import hexlet.code.exception.IncorrectUrlException;
 import hexlet.code.model.Url;
 import hexlet.code.service.UrlService;
+import hexlet.code.util.FlashMessage;
 import hexlet.code.util.NamedRoutes;
 import io.javalin.http.Context;
 import lombok.AllArgsConstructor;
@@ -16,7 +18,7 @@ import java.util.List;
 import static io.javalin.rendering.template.TemplateUtil.model;
 
 @AllArgsConstructor
-public final class UrlController {
+public final class UrlController extends BaseController {
     private final UrlService urlService;
 
     public void index(Context ctx) throws SQLException {
@@ -41,25 +43,25 @@ public final class UrlController {
         try {
             String urlFormParam = ctx.formParamAsClass("url", String.class).get();
             this.urlService.createUrl(urlFormParam);
-            ctx.sessionAttribute(BasePage.FLASH_KEY, "Page has been added successfully.");
-            ctx.sessionAttribute(BasePage.FLASH_TYPE_KEY, BasePage.FLASH_TYPE_SUCCESS);
-        } catch (IllegalArgumentException e) {
-            ctx.sessionAttribute(BasePage.FLASH_KEY, "Incorrect URL");
-            ctx.sessionAttribute(BasePage.FLASH_TYPE_KEY, BasePage.FLASH_TYPE_DANGER);
+            this.setFlash(ctx, FlashMessage.PAGE_ADDED);
+        } catch (IncorrectUrlException e) {
+            this.setFlash(ctx, FlashMessage.INCORRECT_URL);
             ctx.redirect(NamedRoutes.homePath());
             return;
         } catch (SQLIntegrityConstraintViolationException e) {
-            ctx.sessionAttribute(BasePage.FLASH_KEY, "Page already exists.");
-            ctx.sessionAttribute(BasePage.FLASH_TYPE_KEY, BasePage.FLASH_TYPE_INFO);
+            this.setFlash(ctx, FlashMessage.PAGE_ALREADY_EXISTS);
         }
         ctx.redirect(NamedRoutes.urlsPath());
     }
 
     public void check(Context ctx) throws SQLException {
         Long id = ctx.pathParamAsClass("id", Long.class).get();
-        this.urlService.checkUrl(id);
-        ctx.sessionAttribute(BasePage.FLASH_KEY, "Page has been checked successfully.");
-        ctx.sessionAttribute(BasePage.FLASH_TYPE_KEY, BasePage.FLASH_TYPE_SUCCESS);
+        try {
+            this.urlService.checkUrl(id);
+            this.setFlash(ctx, FlashMessage.PAGE_CHECKED);
+        } catch (IncorrectUrlException e) {
+            this.setFlash(ctx, FlashMessage.INCORRECT_URL);
+        }
         ctx.redirect(NamedRoutes.urlPath(id));
     }
 }
