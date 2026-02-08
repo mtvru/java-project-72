@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class UrlCheckRepository extends BaseRepository<UrlCheck> {
+public final class UrlCheckRepository extends BaseRepository<UrlCheck> {
     private static final String COLUMN_URL_ID = "url_id";
     private static final String COLUMN_STATUS_CODE = "status_code";
     private static final String COLUMN_TITLE = "title";
@@ -28,18 +28,22 @@ public class UrlCheckRepository extends BaseRepository<UrlCheck> {
         String sql = String.format(
                 "INSERT INTO %s (%s, %s, %s, %s, %s, %s) VALUES (?, ?, ?, ?, ?, ?)",
                 getTableName(), COLUMN_URL_ID, COLUMN_STATUS_CODE, COLUMN_TITLE, COLUMN_H1, COLUMN_DESCRIPTION,
-                COLUMN_CREATED_AT
-        );
+                COLUMN_CREATED_AT);
         try (
-                Connection conn = this.dataSource.getConnection();
-                PreparedStatement preparedStatement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
-        ) {
-            preparedStatement.setLong(1, urlCheck.getUrlId());
-            preparedStatement.setObject(2, urlCheck.getStatusCode(), Types.INTEGER);
-            preparedStatement.setString(3, urlCheck.getTitle());
-            preparedStatement.setString(4, urlCheck.getH1());
-            preparedStatement.setString(5, urlCheck.getDescription());
-            preparedStatement.setTimestamp(6, urlCheck.getCreatedAt());
+                Connection conn = getConnection();
+                PreparedStatement preparedStatement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            final int pUrlId = 1;
+            final int pStatusCode = 2;
+            final int pTitle = 3;
+            final int pH1 = 4;
+            final int pDescription = 5;
+            final int pCreatedAt = 6;
+            preparedStatement.setLong(pUrlId, urlCheck.getUrlId());
+            preparedStatement.setObject(pStatusCode, urlCheck.getStatusCode(), Types.INTEGER);
+            preparedStatement.setString(pTitle, urlCheck.getTitle());
+            preparedStatement.setString(pH1, urlCheck.getH1());
+            preparedStatement.setString(pDescription, urlCheck.getDescription());
+            preparedStatement.setTimestamp(pCreatedAt, urlCheck.getCreatedAt());
             preparedStatement.executeUpdate();
 
             try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
@@ -56,9 +60,8 @@ public class UrlCheckRepository extends BaseRepository<UrlCheck> {
         String sql = "SELECT * FROM " + this.getTableName()
                 + " WHERE " + COLUMN_URL_ID + " = ? ORDER BY " + COLUMN_ID + " DESC";
         try (
-                Connection conn = this.dataSource.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)
-        ) {
+                Connection conn = getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, urlId);
             try (ResultSet resultSet = stmt.executeQuery()) {
                 List<UrlCheck> result = new ArrayList<>();
@@ -75,13 +78,11 @@ public class UrlCheckRepository extends BaseRepository<UrlCheck> {
         String sql = String.format(
                 "SELECT DISTINCT ON (%s) * FROM %s WHERE %s >= %s and %s <= %s ORDER BY %s, %s DESC",
                 COLUMN_URL_ID, this.getTableName(), COLUMN_URL_ID, fromUrlId, COLUMN_URL_ID, toUrlId, COLUMN_URL_ID,
-                COLUMN_ID
-        );
+                COLUMN_ID);
         try (
-                Connection conn = this.dataSource.getConnection();
+                Connection conn = getConnection();
                 Statement stmt = conn.createStatement();
-                ResultSet resultSet = stmt.executeQuery(sql)
-        ) {
+                ResultSet resultSet = stmt.executeQuery(sql)) {
             Map<Long, UrlCheck> result = new HashMap<>();
             while (resultSet.next()) {
                 UrlCheck urlCheck = mapRow(resultSet);
@@ -94,13 +95,12 @@ public class UrlCheckRepository extends BaseRepository<UrlCheck> {
     @Override
     protected UrlCheck mapRow(ResultSet resultSet) throws SQLException {
         UrlCheck urlCheck = new UrlCheck(
-            resultSet.getLong(COLUMN_URL_ID),
-            resultSet.getObject(COLUMN_STATUS_CODE, Integer.class),
-            resultSet.getString(COLUMN_TITLE),
-            resultSet.getString(COLUMN_H1),
-            resultSet.getString(COLUMN_DESCRIPTION),
-            resultSet.getTimestamp(COLUMN_CREATED_AT)
-        );
+                resultSet.getLong(COLUMN_URL_ID),
+                resultSet.getObject(COLUMN_STATUS_CODE, Integer.class),
+                resultSet.getString(COLUMN_TITLE),
+                resultSet.getString(COLUMN_H1),
+                resultSet.getString(COLUMN_DESCRIPTION),
+                resultSet.getTimestamp(COLUMN_CREATED_AT));
         urlCheck.assignId(resultSet.getLong(COLUMN_ID));
         return urlCheck;
     }

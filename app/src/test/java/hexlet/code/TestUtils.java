@@ -19,8 +19,7 @@ public class TestUtils {
         UrlCheckRepository urlCheckRepo = new UrlCheckRepository(ds);
         try (
                 Connection conn = ds.getConnection();
-                Statement stmt = conn.createStatement()
-        ) {
+                Statement stmt = conn.createStatement()) {
             stmt.addBatch("SET REFERENTIAL_INTEGRITY FALSE");
             stmt.addBatch("TRUNCATE TABLE " + urlRepo.getTableName() + " RESTART IDENTITY;");
             stmt.addBatch("TRUNCATE TABLE " + urlCheckRepo.getTableName() + " RESTART IDENTITY;");
@@ -31,13 +30,12 @@ public class TestUtils {
 
     public static long insertLocalhostToUrl(DataSource ds) throws SQLException {
         String sql = """
-        INSERT INTO urls (name, created_at)
-        VALUES ('http://somehost:7171', CURRENT_TIMESTAMP)
-        """;
+                INSERT INTO urls (name, created_at)
+                VALUES ('http://somehost:7171', CURRENT_TIMESTAMP)
+                """;
         try (
                 Connection conn = ds.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
-        ) {
+                PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.executeUpdate();
             try (ResultSet rs = stmt.getGeneratedKeys()) {
                 if (rs.next()) {

@@ -16,7 +16,7 @@ import java.util.List;
 import static io.javalin.rendering.template.TemplateUtil.model;
 
 @AllArgsConstructor
-public class UrlController {
+public final class UrlController {
     private final UrlService urlService;
 
     public void index(Context ctx) throws SQLException {

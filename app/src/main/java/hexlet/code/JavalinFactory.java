@@ -17,8 +17,9 @@ import javax.sql.DataSource;
 import java.sql.SQLException;
 
 public class JavalinFactory {
-    private final static String TEMPLATES_NAME = "templates";
-    private static final Logger log = LoggerFactory.getLogger(JavalinFactory.class);
+    private static final String TEMPLATES_NAME = "templates";
+    private static final Logger LOG = LoggerFactory.getLogger(JavalinFactory.class);
+    private static final int SC_INTERNAL_SERVER_ERROR = 500;
 
     public static Javalin createApp(DataSource dataSource) {
         Javalin app = Javalin.create(config -> {
@@ -38,8 +39,8 @@ public class JavalinFactory {
         app.post(NamedRoutes.urlsPath(), urlController::create);
         app.post(NamedRoutes.urlChecksPath("{id}"), urlController::check);
         app.exception(SQLException.class, (e, ctx) -> {
-            log.error(e.getMessage(), e);
-            ctx.status(500).result("DB connection error.");
+            LOG.error(e.getMessage(), e);
+            ctx.status(SC_INTERNAL_SERVER_ERROR).result("DB connection error.");
         });
         return app;
     }

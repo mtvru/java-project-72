@@ -36,14 +36,14 @@ public final class Url {
         this.createdAt = createdAt;
     }
 
-    public void assignId(Long id) {
-        if (id == null) {
+    public void assignId(Long entityId) {
+        if (entityId == null) {
             throw new IllegalArgumentException("ID is required");
         }
         if (this.id != null) {
             throw new IllegalStateException("ID already assigned");
         }
-        this.id = id;
+        this.id = entityId;
     }
 
     public void addUrlCheck(UrlCheck check) {

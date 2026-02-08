@@ -11,7 +11,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UrlRepository extends BaseRepository<Url> {
+public final class UrlRepository extends BaseRepository<Url> {
     private static final String COLUMN_NAME = "name";
 
     public UrlRepository(DataSource dataSource) {
@@ -23,8 +23,7 @@ public class UrlRepository extends BaseRepository<Url> {
                 + " (" + COLUMN_NAME + ", " + COLUMN_CREATED_AT + ") VALUES (?, ?)";
         try (
                 Connection conn = getConnection();
-                PreparedStatement preparedStatement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)
-        ) {
+                PreparedStatement preparedStatement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, url.getName());
             preparedStatement.setTimestamp(2, url.getCreatedAt());
             preparedStatement.executeUpdate();
@@ -43,8 +42,7 @@ public class UrlRepository extends BaseRepository<Url> {
         try (
                 Connection conn = getConnection();
                 Statement stmt = conn.createStatement();
-                ResultSet resultSet = stmt.executeQuery(sql)
-        ) {
+                ResultSet resultSet = stmt.executeQuery(sql)) {
             List<Url> result = new ArrayList<>();
             while (resultSet.next()) {
                 Url url = this.mapRow(resultSet);
@@ -58,8 +56,7 @@ public class UrlRepository extends BaseRepository<Url> {
     protected Url mapRow(ResultSet resultSet) throws SQLException {
         Url url = new Url(
                 resultSet.getString(COLUMN_NAME),
-                resultSet.getTimestamp(COLUMN_CREATED_AT)
-        );
+                resultSet.getTimestamp(COLUMN_CREATED_AT));
         url.assignId(resultSet.getLong(COLUMN_ID));
 
         return url;

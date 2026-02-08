@@ -6,7 +6,7 @@ import io.javalin.http.Context;
 
 import static io.javalin.rendering.template.TemplateUtil.model;
 
-public class HomeController {
+public final class HomeController {
     public void index(Context ctx) {
         HomePage page = new HomePage();
         page.setPath(ctx.path());

@@ -5,8 +5,8 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class AppConfig {
-    public static String ENV_DEV = "development";
-    public static String KEY_DATABASE_URL = "DATABASE_URL";
+    public static final String ENV_DEV = "development";
+    public static final String KEY_DATABASE_URL = "DATABASE_URL";
 
     public static int getPort() {
         String port = System.getenv().getOrDefault("PORT", "7070");

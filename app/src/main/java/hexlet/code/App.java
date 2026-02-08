@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import javax.sql.DataSource;
 
 public final class App {
-    private static final Logger log = LoggerFactory.getLogger(App.class);
+    private static final Logger LOG = LoggerFactory.getLogger(App.class);
 
     /**
      * @param args command line arguments
@@ -19,7 +19,7 @@ public final class App {
         String dbUrl = AppConfig.getDatabaseUrl();
 
         if (dbUrl == null || dbUrl.isBlank()) {
-            log.error(AppConfig.KEY_DATABASE_URL + " is required!");
+            LOG.error(AppConfig.KEY_DATABASE_URL + " is required!");
             System.exit(1);
         }
 
@@ -29,7 +29,7 @@ public final class App {
             Javalin app = JavalinFactory.createApp(dataSource);
             app.start(AppConfig.getPort());
         } catch (Exception e) {
-            log.error("Fatal error: ", e);
+            LOG.error("Fatal error: ", e);
             System.exit(1);
         }
     }

@@ -34,8 +34,7 @@ public final class UrlCheck {
             String title,
             String h1,
             String description,
-            Timestamp createdAt
-    ) {
+            Timestamp createdAt) {
         if (urlId == null) {
             throw new IllegalArgumentException("UrlId is required");
         }
@@ -50,13 +49,13 @@ public final class UrlCheck {
         this.createdAt = createdAt;
     }
 
-    public void assignId(Long id) {
-        if (id == null) {
+    public void assignId(Long entityId) {
+        if (entityId == null) {
             throw new IllegalArgumentException("ID is required");
         }
         if (this.id != null) {
             throw new IllegalStateException("ID already assigned");
         }
-        this.id = id;
+        this.id = entityId;
     }
 }

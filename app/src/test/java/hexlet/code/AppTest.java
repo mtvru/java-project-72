@@ -20,6 +20,10 @@ import io.javalin.testtools.JavalinTest;
 import javax.sql.DataSource;
 
 public class AppTest {
+    private static final int SC_OK = 200;
+    private static final int SC_NOT_FOUND = 404;
+    private static final long NON_EXISTENT_ID = 999999L;
+    private static final long SLEEP_TIME = 1000;
     private Javalin app;
     private DataSource dataSource;
 
@@ -41,7 +45,7 @@ public class AppTest {
     public void testMainPage() {
         JavalinTest.test(this.app, (server, client) -> {
             Response response = client.get(NamedRoutes.homePath());
-            assertThat(response.code()).isEqualTo(200);
+            assertThat(response.code()).isEqualTo(SC_OK);
             assertThat(response.body().string()).contains("Page analyzer");
         });
     }
@@ -50,7 +54,7 @@ public class AppTest {
     public void testUrlsPage() {
         JavalinTest.test(this.app, (server, client) -> {
             Response response = client.get(NamedRoutes.urlsPath());
-            assertThat(response.code()).isEqualTo(200);
+            assertThat(response.code()).isEqualTo(SC_OK);
         });
     }
 
@@ -59,7 +63,7 @@ public class AppTest {
         Long urlId = TestUtils.insertLocalhostToUrl(this.dataSource);
         JavalinTest.test(this.app, (server, client) -> {
             Response response = client.get(NamedRoutes.urlPath(urlId));
-            assertThat(response.code()).isEqualTo(200);
+            assertThat(response.code()).isEqualTo(SC_OK);
         });
     }
 
@@ -68,7 +72,7 @@ public class AppTest {
         JavalinTest.test(this.app, (server, client) -> {
             String requestBody = "url=http://localhost:7070/";
             try (Response response = client.post(NamedRoutes.urlsPath(), requestBody)) {
-                assertThat(response.code()).isEqualTo(200);
+                assertThat(response.code()).isEqualTo(SC_OK);
                 assertThat(response.body().string()).contains("localhost");
             }
         });
@@ -77,8 +81,8 @@ public class AppTest {
     @Test
     void testUrlNotFound() {
         JavalinTest.test(this.app, (server, client) -> {
-            Response response = client.get(NamedRoutes.urlPath(999999L));
-            assertThat(response.code()).isEqualTo(404);
+            Response response = client.get(NamedRoutes.urlPath(NON_EXISTENT_ID));
+            assertThat(response.code()).isEqualTo(SC_NOT_FOUND);
         });
     }
 
@@ -97,11 +101,11 @@ public class AppTest {
         JavalinTest.test(app, (server, client) -> {
             String requestBody = "url=" + urlName;
             try (Response response = client.post(NamedRoutes.urlsPath(), requestBody)) {
-                assertThat(response.code()).isEqualTo(200);
+                assertThat(response.code()).isEqualTo(SC_OK);
                 assertThat(response.body().string()).contains(urlName.substring(0, urlName.length() - 1));
             }
             try (Response response = client.post(NamedRoutes.urlChecksPath(urlId))) {
-                assertThat(response.code()).isEqualTo(200);
+                assertThat(response.code()).isEqualTo(SC_OK);
             }
             try (Response response = client.get(NamedRoutes.urlPath(urlId))) {
                 String body = response.body().string();
@@ -113,9 +117,11 @@ public class AppTest {
                 Elements tds = firstRow.select("td");
                 String statusCode = tds.get(1).text();
                 String title = tds.get(2).text();
-                String h1 = tds.get(3).text();
-                String description = tds.get(4).text();
-                assertThat(response.code()).isEqualTo(200);
+                final int h1Pos = 3;
+                String h1 = tds.get(h1Pos).text();
+                final int descriptionPos = 4;
+                String description = tds.get(descriptionPos).text();
+                assertThat(response.code()).isEqualTo(SC_OK);
                 assertThat(statusCode).isEqualTo("200");
                 assertThat(title).isEqualTo("Test Title");
                 assertThat(h1).isEqualTo("Test H1");
@@ -128,27 +134,27 @@ public class AppTest {
     @Test
     void testLatestUrlCheck() throws Exception {
         String firstHtml = """
-        <html>
-            <head>
-                <title>First Title</title>
-                <meta name="description" content="First Description">
-            </head>
-            <body>
-                <h1>First H1</h1>
-            </body>
-        </html>
-        """;
+                <html>
+                    <head>
+                        <title>First Title</title>
+                        <meta name="description" content="First Description">
+                    </head>
+                    <body>
+                        <h1>First H1</h1>
+                    </body>
+                </html>
+                """;
         String secondHtml = """
-        <html>
-            <head>
-                <title>Second Title</title>
-                <meta name="description" content="Second Description">
-            </head>
-            <body>
-                <h1>Second H1</h1>
-            </body>
-        </html>
-        """;
+                <html>
+                    <head>
+                        <title>Second Title</title>
+                        <meta name="description" content="Second Description">
+                    </head>
+                    <body>
+                        <h1>Second H1</h1>
+                    </body>
+                </html>
+                """;
         MockWebServer mockServer = new MockWebServer();
         mockServer.enqueue(new MockResponse.Builder()
                 .body(firstHtml)
@@ -162,15 +168,15 @@ public class AppTest {
         JavalinTest.test(app, (server, client) -> {
             String requestBody = "url=" + urlName;
             try (Response response = client.post(NamedRoutes.urlsPath(), requestBody)) {
-                assertThat(response.code()).isEqualTo(200);
+                assertThat(response.code()).isEqualTo(SC_OK);
                 assertThat(response.body().string()).contains(urlName.substring(0, urlName.length() - 1));
             }
             try (Response response = client.post(NamedRoutes.urlChecksPath(urlId))) {
-                assertThat(response.code()).isEqualTo(200);
+                assertThat(response.code()).isEqualTo(SC_OK);
             }
-            sleep(1000);
+            sleep(SLEEP_TIME);
             try (Response response = client.post(NamedRoutes.urlChecksPath(urlId))) {
-                assertThat(response.code()).isEqualTo(200);
+                assertThat(response.code()).isEqualTo(SC_OK);
             }
             String latestDate;
             try (Response response = client.get(NamedRoutes.urlPath(urlId))) {
@@ -181,7 +187,8 @@ public class AppTest {
                 Element firstRow = rows.getFirst();
                 assertThat(firstRow).isNotNull();
                 Elements tds = firstRow.select("td");
-                latestDate = tds.get(5).text();
+                final int latestDatePos = 5;
+                latestDate = tds.get(latestDatePos).text();
             }
             try (Response response = client.get(NamedRoutes.urlsPath())) {
                 assertThat(response.body().string()).contains(latestDate);

@@ -9,17 +9,16 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 @AllArgsConstructor
-abstract public class BaseRepository<T> {
+public abstract class BaseRepository<T> {
     protected static final String COLUMN_ID = "id";
     protected static final String COLUMN_CREATED_AT = "created_at";
-    protected final DataSource dataSource;
+    private final DataSource dataSource;
 
-    public Optional<T> find(Long id) throws SQLException {
+    public final Optional<T> find(Long id) throws SQLException {
         String sql = "SELECT * FROM " + this.getTableName() + " WHERE " + COLUMN_ID + " = ?";
         try (
                 Connection conn = getConnection();
-                PreparedStatement stmt = conn.prepareStatement(sql)
-        ) {
+                PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, id);
             try (ResultSet resultSet = stmt.executeQuery()) {
                 if (resultSet.next()) {
@@ -30,7 +29,7 @@ abstract public class BaseRepository<T> {
         }
     }
 
-    protected Connection getConnection() throws SQLException {
+    protected final Connection getConnection() throws SQLException {
         return dataSource.getConnection();
     }
 

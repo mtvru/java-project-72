@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DatabaseInitializer {
-    private final static String SCHEMA_NAME = "schema.sql";
+    private static final String SCHEMA_NAME = "schema.sql";
 
     public static void runMigrations(DataSource dataSource) throws SQLException, IOException {
         String sql = readResourceFile();
@@ -37,8 +37,7 @@ public class DatabaseInitializer {
     private static void executeSql(DataSource ds, String sql) throws SQLException {
         try (
                 Connection conn = ds.getConnection();
-                Statement stmt = conn.createStatement()
-        ) {
+                Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
         }
     }

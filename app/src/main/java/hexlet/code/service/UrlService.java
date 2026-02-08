@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 @AllArgsConstructor
-public class UrlService {
+public final class UrlService {
     private final UrlRepository urlRepository;
     private final UrlCheckRepository urlCheckRepository;
 
@@ -56,7 +56,7 @@ public class UrlService {
             Url url = new Url(urlParam.getProtocol() + "://" + urlParam.getHost() + port);
             this.urlRepository.save(url);
             return url;
-        } catch (MalformedURLException|URISyntaxException|IllegalArgumentException e) {
+        } catch (MalformedURLException | URISyntaxException | IllegalArgumentException e) {
             throw new IllegalArgumentException("Incorrect URL");
         }
     }
