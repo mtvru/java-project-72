@@ -1,5 +1,6 @@
 package hexlet.code.service;
 
+import hexlet.code.exception.DbConnectionException;
 import hexlet.code.exception.IncorrectUrlException;
 import hexlet.code.model.Url;
 import hexlet.code.model.UrlCheck;
@@ -27,28 +28,36 @@ public final class UrlService {
     private final UrlRepository urlRepository;
     private final UrlCheckRepository urlCheckRepository;
 
-    public List<Url> getAllUrlsWithLatestUrlChecks() throws SQLException {
-        List<Url> urls = this.urlRepository.findAll();
-        if (urls.isEmpty()) {
-            return Collections.emptyList();
+    public List<Url> getAllUrlsWithLatestUrlChecks() {
+        try {
+            List<Url> urls = this.urlRepository.findAll();
+            if (urls.isEmpty()) {
+                return Collections.emptyList();
+            }
+            Map<Long, UrlCheck> latestUrlChecks = this.urlCheckRepository.findLatestUrlChecksByUrls(urls);
+            for (Url url : urls) {
+                UrlCheck latestCheck = latestUrlChecks.get(url.getId());
+                url.addUrlCheck(latestCheck);
+            }
+            return urls;
+        } catch (SQLException e) {
+            throw new DbConnectionException(e);
         }
-        Map<Long, UrlCheck> latestUrlChecks = this.urlCheckRepository.findLatestUrlChecksByUrls(urls);
-        for (Url url : urls) {
-            UrlCheck latestCheck = latestUrlChecks.get(url.getId());
-            url.addUrlCheck(latestCheck);
-        }
-        return urls;
     }
 
-    public Url getUrlWithLatestUrlChecks(Long urlId) throws SQLException {
-        Url url = this.urlRepository.find(urlId)
-                .orElseThrow(() -> new NotFoundResponse("Url with id = " + urlId + " not found"));
-        List<UrlCheck> urlChecks = this.urlCheckRepository.findByUrlId(urlId);
-        urlChecks.forEach(url::addUrlCheck);
-        return url;
+    public Url getUrlWithLatestUrlChecks(Long urlId) {
+        try {
+            Url url = this.urlRepository.find(urlId)
+                    .orElseThrow(() -> new NotFoundResponse("Url with id = " + urlId + " not found"));
+            List<UrlCheck> urlChecks = this.urlCheckRepository.findByUrlId(urlId);
+            urlChecks.forEach(url::addUrlCheck);
+            return url;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public Url createUrl(String urlString) throws SQLException {
+    public Url createUrl(String urlString) {
         try {
             URI uri = new URI(urlString);
             URL urlParam = uri.toURL();
@@ -58,13 +67,15 @@ public final class UrlService {
             return url;
         } catch (MalformedURLException | URISyntaxException | IllegalArgumentException e) {
             throw new IncorrectUrlException();
+        } catch (SQLException e) {
+            throw new DbConnectionException(e);
         }
     }
 
-    public UrlCheck checkUrl(Long urlId) throws SQLException {
-        Url url = this.urlRepository.find(urlId)
-                .orElseThrow(() -> new NotFoundResponse("Url with id = " + urlId + " not found"));
+    public UrlCheck checkUrl(Long urlId) {
         try {
+            Url url = this.urlRepository.find(urlId)
+                    .orElseThrow(() -> new NotFoundResponse("Url with id = " + urlId + " not found"));
             HttpResponse<String> response = Unirest.get(url.getName()).asString();
             Integer statusCode = response.getStatus();
             Document doc = Jsoup.parse(response.getBody());
@@ -78,6 +89,8 @@ public final class UrlService {
             return urlCheck;
         } catch (UnirestException e) {
             throw new IncorrectUrlException();
+        } catch (SQLException e) {
+            throw new DbConnectionException(e);
         }
     }
 }

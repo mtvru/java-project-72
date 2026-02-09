@@ -3,6 +3,7 @@ package hexlet.code.controller;
 import hexlet.code.dto.BasePage;
 import hexlet.code.dto.urls.UrlPage;
 import hexlet.code.dto.urls.UrlsPage;
+import hexlet.code.exception.DbConnectionException;
 import hexlet.code.exception.IncorrectUrlException;
 import hexlet.code.model.Url;
 import hexlet.code.service.UrlService;
@@ -20,7 +21,7 @@ import static io.javalin.rendering.template.TemplateUtil.model;
 public final class UrlController extends BaseController {
     private final UrlService urlService;
 
-    public void index(Context ctx) throws SQLException {
+    public void index(Context ctx) {
         List<Url> urls = this.urlService.getAllUrlsWithLatestUrlChecks();
         UrlsPage page = new UrlsPage(urls);
         page.setPath(ctx.path());
@@ -29,7 +30,7 @@ public final class UrlController extends BaseController {
         ctx.render("urls/index.jte", model("page", page));
     }
 
-    public void show(Context ctx) throws SQLException {
+    public void show(Context ctx) {
         Long id = ctx.pathParamAsClass("id", Long.class).get();
         Url url = this.urlService.getUrlWithLatestUrlChecks(id);
         UrlPage page = new UrlPage(url);
@@ -38,7 +39,7 @@ public final class UrlController extends BaseController {
         ctx.render("urls/show.jte", model("page", page));
     }
 
-    public void create(Context ctx) throws SQLException {
+    public void create(Context ctx) {
         try {
             String urlFormParam = ctx.formParamAsClass("url", String.class).get();
             this.urlService.createUrl(urlFormParam);
@@ -47,8 +48,9 @@ public final class UrlController extends BaseController {
         } catch (IncorrectUrlException e) {
             this.setFlash(ctx, FlashMessage.INCORRECT_URL);
             ctx.redirect(NamedRoutes.homePath());
-        } catch (SQLException e) {
-            if ("23505".equals(e.getSQLState())) {
+        } catch (DbConnectionException e) {
+            SQLException sqlEx = e.getCause() instanceof SQLException ? (SQLException) e.getCause() : null;
+            if (sqlEx != null && "23505".equals(sqlEx.getSQLState())) {
                 this.setFlash(ctx, FlashMessage.PAGE_ALREADY_EXISTS);
                 ctx.redirect(NamedRoutes.urlsPath());
                 return;
@@ -57,7 +59,7 @@ public final class UrlController extends BaseController {
         }
     }
 
-    public void check(Context ctx) throws SQLException {
+    public void check(Context ctx) {
         Long id = ctx.pathParamAsClass("id", Long.class).get();
         try {
             this.urlService.checkUrl(id);
