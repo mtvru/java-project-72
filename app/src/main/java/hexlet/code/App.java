@@ -10,26 +10,41 @@ import org.slf4j.LoggerFactory;
 
 public final class App {
     private static final Logger LOG = LoggerFactory.getLogger(App.class);
-    private static final HikariDataSource DATA_SOURCE = HikariDataSourceFactory.create();
-    private static Javalin app;
 
-    static {
+    public static Javalin getApp() {
+        HikariDataSource dataSource = HikariDataSourceFactory.create();
         try {
-            DatabaseInitializer.runMigrations(DATA_SOURCE);
-            app = JavalinFactory.createApp(DATA_SOURCE);
+            DatabaseInitializer.runMigrations(dataSource);
+            Javalin app = JavalinFactory.createApp(dataSource);
             app.events(event -> {
                 event.serverStopped(() -> {
                     LOG.info("Stopping HikariDataSource...");
-                    DATA_SOURCE.close();
+                    dataSource.close();
                 });
                 event.serverStopFailed(() -> {
                     LOG.error("serverStopFailed stopping HikariDataSource...");
-                    DATA_SOURCE.close();
+                    dataSource.close();
                 });
             });
+            return app;
+        } catch (Exception e) {
+            dataSource.close();
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * @param args command line arguments
+     */
+    public static void main(String[] args) {
+        Javalin app = null;
+        try {
+            app = getApp();
+            app.start(AppConfig.getPort());
+            Javalin finalApp = app;
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 LOG.info("Received shutdown signal, stopping app...");
-                app.stop();
+                finalApp.stop();
             }));
         } catch (Exception e) {
             LOG.error("Fatal error: ", e);
@@ -38,17 +53,5 @@ public final class App {
             }
             System.exit(1);
         }
-    }
-
-    public static Javalin getApp() {
-        return app;
-    }
-
-    /**
-     * @param args command line arguments
-     */
-    public static void main(String[] args) {
-        Javalin javalinApp = getApp();
-        javalinApp.start(AppConfig.getPort());
     }
 }
