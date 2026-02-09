@@ -87,6 +87,13 @@ tasks.jacocoTestReport {
     }
 }
 
+tasks.shadowJar {
+    archiveBaseName.set("app")
+    archiveClassifier.set("all")
+    archiveVersion.set("1.0-SNAPSHOT")
+    mergeServiceFiles()
+}
+
 tasks.withType<DependencyUpdatesTask> {
     rejectVersionIf {
         isNonStable(candidate.version)
