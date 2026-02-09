@@ -10,6 +10,12 @@ import org.slf4j.LoggerFactory;
 
 public final class App {
     private static final Logger LOG = LoggerFactory.getLogger(App.class);
+    private static final HikariDataSource DATA_SOURCE = HikariDataSourceFactory.create();
+
+    public static Javalin getApp() throws Exception {
+        DatabaseInitializer.runMigrations(DATA_SOURCE);
+        return JavalinFactory.createApp(DATA_SOURCE);
+    }
 
     /**
      * @param args command line arguments
@@ -20,24 +26,22 @@ public final class App {
             LOG.error(AppConfig.KEY_DATABASE_URL + " is required!");
             System.exit(1);
         }
-        HikariDataSource dataSource = HikariDataSourceFactory.create();
         Javalin app = null;
         try {
-            DatabaseInitializer.runMigrations(dataSource);
-            app = JavalinFactory.createApp(dataSource);
+            app = getApp();
             app.start(AppConfig.getPort());
             Javalin finalApp = app;
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 LOG.info("Received shutdown signal, stopping app...");
                 finalApp.stop();
-                dataSource.close();
+                DATA_SOURCE.close();
             }));
         } catch (Exception e) {
             LOG.error("Fatal error: ", e);
             if (app != null) {
                 app.stop();
             }
-            dataSource.close();
+            DATA_SOURCE.close();
             System.exit(1);
         }
     }
