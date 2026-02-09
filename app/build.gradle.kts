@@ -65,7 +65,7 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
-    environment("DATABASE_URL", "jdbc:h2:mem:test_page_analyzer;DB_CLOSE_DELAY=-1;")
+    environment("JDBC_DATABASE_URL", "jdbc:h2:mem:test_page_analyzer;DB_CLOSE_DELAY=-1;")
     systemProperty("org.slf4j.simpleLogger.defaultLogLevel", "warn")
     testLogging {
         exceptionFormat = TestExceptionFormat.FULL

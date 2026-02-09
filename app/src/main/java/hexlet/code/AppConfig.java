@@ -17,7 +17,7 @@ public final class AppConfig {
     }
 
     public static String getDatabaseUrl() {
-        return System.getenv().getOrDefault("DATABASE_URL", "jdbc:h2:mem:page_analyzer;DB_CLOSE_DELAY=-1;");
+        return System.getenv().getOrDefault("JDBC_DATABASE_URL", "jdbc:h2:mem:page_analyzer;DB_CLOSE_DELAY=-1;");
     }
 
     public static int getMaximumPoolSize() {
