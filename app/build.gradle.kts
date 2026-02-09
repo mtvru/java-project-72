@@ -91,6 +91,7 @@ tasks.shadowJar {
     archiveBaseName.set("app")
     archiveClassifier.set("all")
     archiveVersion.set("1.0-SNAPSHOT")
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
     mergeServiceFiles()
 }
 

@@ -12,7 +12,6 @@ import io.javalin.http.Context;
 import lombok.AllArgsConstructor;
 
 import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 
 import static io.javalin.rendering.template.TemplateUtil.model;
@@ -44,14 +43,18 @@ public final class UrlController extends BaseController {
             String urlFormParam = ctx.formParamAsClass("url", String.class).get();
             this.urlService.createUrl(urlFormParam);
             this.setFlash(ctx, FlashMessage.PAGE_ADDED);
+            ctx.redirect(NamedRoutes.urlsPath());
         } catch (IncorrectUrlException e) {
             this.setFlash(ctx, FlashMessage.INCORRECT_URL);
             ctx.redirect(NamedRoutes.homePath());
-            return;
-        } catch (SQLIntegrityConstraintViolationException e) {
-            this.setFlash(ctx, FlashMessage.PAGE_ALREADY_EXISTS);
+        } catch (SQLException e) {
+            if ("23505".equals(e.getSQLState())) {
+                this.setFlash(ctx, FlashMessage.PAGE_ALREADY_EXISTS);
+                ctx.redirect(NamedRoutes.urlsPath());
+                return;
+            }
+            throw e;
         }
-        ctx.redirect(NamedRoutes.urlsPath());
     }
 
     public void check(Context ctx) throws SQLException {
