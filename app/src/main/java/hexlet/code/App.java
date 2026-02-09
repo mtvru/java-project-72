@@ -37,11 +37,6 @@ public final class App {
      * @param args command line arguments
      */
     public static void main(String[] args) {
-        String dbUrl = AppConfig.getDatabaseUrl();
-        if (dbUrl == null || dbUrl.isBlank()) {
-            LOG.error(AppConfig.KEY_DATABASE_URL + " is required!");
-            System.exit(1);
-        }
         Javalin app = null;
         try {
             app = getApp();

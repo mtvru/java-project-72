@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class AppConfig {
     public static final String ENV_DEV = "development";
-    public static final String KEY_DATABASE_URL = "DATABASE_URL";
 
     public static int getPort() {
         String port = System.getenv().getOrDefault("PORT", "7070");
@@ -18,7 +17,7 @@ public final class AppConfig {
     }
 
     public static String getDatabaseUrl() {
-        return System.getenv(KEY_DATABASE_URL);
+        return System.getenv().getOrDefault("DATABASE_URL", "jdbc:h2:mem:page_analyzer;DB_CLOSE_DELAY=-1;");
     }
 
     public static int getMaximumPoolSize() {
