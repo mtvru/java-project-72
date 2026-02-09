@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.CookieManager;
 import java.sql.SQLException;
 import java.util.stream.Stream;
+import com.zaxxer.hikari.HikariDataSource;
 import hexlet.code.util.FlashMessage;
 import hexlet.code.util.NamedRoutes;
 import io.javalin.testtools.TestConfig;
@@ -18,7 +19,9 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import io.javalin.Javalin;
@@ -27,29 +30,35 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import javax.sql.DataSource;
-
 public final class AppTest {
     private static final int SC_OK = 200;
     private static final int SC_NOT_FOUND = 404;
     private static final int SC_ERROR = 500;
     private static final long NON_EXISTENT_ID = 999999L;
     private static final long SLEEP_TIME = 1000;
+    private static HikariDataSource dataSource;
     private Javalin app;
-    private DataSource dataSource;
+
+    @BeforeAll
+    public static void beforeAll() throws SQLException, IOException {
+        dataSource = HikariDataSourceFactory.create();
+        DatabaseInitializer.runMigrations(dataSource);
+    }
 
     @BeforeEach
-    public void beforeEach() throws IOException, SQLException {
-        this.dataSource = DataSourceFactory.createDataSource();
-        DatabaseInitializer.runMigrations(this.dataSource);
-        this.app = JavalinFactory.createApp(this.dataSource);
-        TestUtils.clearTables(this.dataSource);
+    public void beforeEach() throws SQLException {
+        this.app = JavalinFactory.createApp(dataSource);
+        TestUtils.clearTables(dataSource);
     }
 
     @AfterEach
-    public void afterEach() throws SQLException {
+    public void afterEach() {
         this.app.stop();
-        this.dataSource.getConnection().close();
+    }
+
+    @AfterAll
+    public static void afterAll() {
+        dataSource.close();
     }
 
     @Test
@@ -73,7 +82,7 @@ public final class AppTest {
 
     @Test
     public void testUrlPage() throws SQLException {
-        Long urlId = TestUtils.insertLocalhostToUrl(this.dataSource);
+        Long urlId = TestUtils.insertLocalhostToUrl(dataSource);
         JavalinTest.test(this.app, (server, client) -> {
             try (Response response = client.get(NamedRoutes.urlPath(urlId))) {
                 assertThat(response.code()).isEqualTo(SC_OK);
@@ -152,7 +161,7 @@ public final class AppTest {
                 true,
                 httpClientWithCookies
         );
-        JavalinTest.test(app, config, (server, client) -> {
+        JavalinTest.test(this.app, config, (server, client) -> {
             String requestBody = "url=" + urlName;
             try (Response response = client.post(NamedRoutes.urlsPath(), requestBody)) {
                 assertThat(response.code()).isEqualTo(SC_OK);
@@ -221,7 +230,7 @@ public final class AppTest {
                 true,
                 httpClientWithCookies
         );
-        JavalinTest.test(app, config, (server, client) -> {
+        JavalinTest.test(this.app, config, (server, client) -> {
             String requestBody = "url=" + urlName;
             try (Response response = client.post(NamedRoutes.urlsPath(), requestBody)) {
                 assertThat(response.code()).isEqualTo(SC_OK);
@@ -267,7 +276,7 @@ public final class AppTest {
             mockServer.start();
             String urlName = mockServer.url("").toString();
             final Long urlId = 1L;
-            JavalinTest.test(app, (server, client) -> {
+            JavalinTest.test(this.app, (server, client) -> {
                 String requestBody = "url=" + urlName;
                 try (Response response = client.post(NamedRoutes.urlsPath(), requestBody)) {
                     assertThat(response.code()).isEqualTo(SC_OK);

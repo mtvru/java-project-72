@@ -5,11 +5,9 @@ import com.zaxxer.hikari.HikariDataSource;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import javax.sql.DataSource;
-
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class DataSourceFactory {
-    public static DataSource createDataSource() {
+public class HikariDataSourceFactory {
+    public static HikariDataSource create() {
         HikariConfig hikariConfig = new HikariConfig();
         hikariConfig.setJdbcUrl(AppConfig.getDatabaseUrl());
         hikariConfig.setMaximumPoolSize(AppConfig.getMaximumPoolSize());
