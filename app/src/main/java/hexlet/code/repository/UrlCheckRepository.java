@@ -61,8 +61,10 @@ public final class UrlCheckRepository extends BaseRepository<UrlCheck> {
     }
 
     public List<UrlCheck> findByUrlId(Long urlId) throws SQLException {
-        String sql = "SELECT * FROM " + this.getTableName()
-                + " WHERE " + COLUMN_URL_ID + " = ? ORDER BY " + COLUMN_ID + " DESC";
+        String sql = String.format(
+            "SELECT * FROM %s WHERE %s = ? ORDER BY %s DESC",
+            this.getTableName(), COLUMN_URL_ID, COLUMN_ID
+        );
         try (
                 Connection conn = getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {

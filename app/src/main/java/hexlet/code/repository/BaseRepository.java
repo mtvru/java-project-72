@@ -18,7 +18,7 @@ public abstract class BaseRepository<T> {
     private final String tableName;
 
     public final Optional<T> find(Long id) throws SQLException {
-        String sql = "SELECT * FROM " + this.getTableName() + " WHERE " + COLUMN_ID + " = ?";
+        String sql = String.format("SELECT * FROM %s WHERE %s = ?", this.getTableName(), COLUMN_ID);
         try (
                 Connection conn = getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql)) {

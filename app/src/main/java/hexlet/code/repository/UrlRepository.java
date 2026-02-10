@@ -20,8 +20,10 @@ public final class UrlRepository extends BaseRepository<Url> {
     }
 
     public void save(Url url) throws SQLException {
-        String sql = "INSERT INTO " + this.getTableName()
-                + " (" + COLUMN_NAME + ", " + COLUMN_CREATED_AT + ") VALUES (?, ?)";
+        String sql = String.format(
+            "INSERT INTO %s (%s, %s) VALUES (?, ?)",
+            this.getTableName(), COLUMN_NAME, COLUMN_CREATED_AT
+        );
         try (
                 Connection conn = getConnection();
                 PreparedStatement preparedStatement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -39,7 +41,7 @@ public final class UrlRepository extends BaseRepository<Url> {
     }
 
     public List<Url> findAll() throws SQLException {
-        String sql = "SELECT * FROM " + this.getTableName() + " ORDER BY " + COLUMN_CREATED_AT + " DESC";
+        String sql = String.format("SELECT * FROM %s ORDER BY %s DESC", this.getTableName(), COLUMN_CREATED_AT);
         try (
                 Connection conn = getConnection();
                 Statement stmt = conn.createStatement();
