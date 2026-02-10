@@ -47,8 +47,8 @@ public final class AppTest {
 
     @BeforeEach
     public void beforeEach() throws SQLException {
-        this.app = JavalinFactory.createApp(dataSource);
-        TestUtils.clearTables(dataSource);
+        this.app = App.getApp();
+        TestUtils.clearTables();
     }
 
     @AfterEach
@@ -82,7 +82,7 @@ public final class AppTest {
 
     @Test
     public void testUrlPage() throws SQLException {
-        Long urlId = TestUtils.insertLocalhostToUrl(dataSource);
+        Long urlId = TestUtils.insertLocalhostToUrl();
         JavalinTest.test(this.app, (server, client) -> {
             try (Response response = client.get(NamedRoutes.urlPath(urlId))) {
                 assertThat(response.code()).isEqualTo(SC_OK);

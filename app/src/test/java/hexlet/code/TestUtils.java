@@ -1,11 +1,10 @@
 package hexlet.code;
 
+import com.zaxxer.hikari.HikariDataSource;
 import hexlet.code.repository.UrlCheckRepository;
 import hexlet.code.repository.UrlRepository;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,11 +13,13 @@ import java.sql.Statement;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TestUtils {
-    public static void clearTables(DataSource ds) throws SQLException {
-        UrlRepository urlRepo = new UrlRepository(ds);
-        UrlCheckRepository urlCheckRepo = new UrlCheckRepository(ds);
+    private static final HikariDataSource DATA_SOURCE = HikariDataSourceFactory.create();
+
+    public static void clearTables() throws SQLException {
+        UrlRepository urlRepo = new UrlRepository(DATA_SOURCE);
+        UrlCheckRepository urlCheckRepo = new UrlCheckRepository(DATA_SOURCE);
         try (
-                Connection conn = ds.getConnection();
+                Connection conn = DATA_SOURCE.getConnection();
                 Statement stmt = conn.createStatement()) {
             stmt.addBatch("SET REFERENTIAL_INTEGRITY FALSE");
             stmt.addBatch("TRUNCATE TABLE " + urlRepo.getTableName() + " RESTART IDENTITY;");
@@ -28,13 +29,13 @@ public class TestUtils {
         }
     }
 
-    public static long insertLocalhostToUrl(DataSource ds) throws SQLException {
+    public static long insertLocalhostToUrl() throws SQLException {
         String sql = """
                 INSERT INTO urls (name, created_at)
                 VALUES ('http://somehost:7171', CURRENT_TIMESTAMP)
                 """;
         try (
-                Connection conn = ds.getConnection();
+                Connection conn = DATA_SOURCE.getConnection();
                 PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.executeUpdate();
             try (ResultSet rs = stmt.getGeneratedKeys()) {
