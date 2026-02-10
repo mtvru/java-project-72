@@ -13,9 +13,10 @@ import java.util.List;
 
 public final class UrlRepository extends BaseRepository<Url> {
     private static final String COLUMN_NAME = "name";
+    private static final String TABLE_NAME = "urls";
 
     public UrlRepository(DataSource dataSource) {
-        super(dataSource);
+        super(dataSource, TABLE_NAME);
     }
 
     public void save(Url url) throws SQLException {
@@ -60,10 +61,5 @@ public final class UrlRepository extends BaseRepository<Url> {
         url.assignId(resultSet.getLong(COLUMN_ID));
 
         return url;
-    }
-
-    @Override
-    public String getTableName() {
-        return "urls";
     }
 }

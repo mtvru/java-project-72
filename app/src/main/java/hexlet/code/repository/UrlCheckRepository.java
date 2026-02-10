@@ -22,15 +22,16 @@ public final class UrlCheckRepository extends BaseRepository<UrlCheck> {
     private static final String COLUMN_TITLE = "title";
     private static final String COLUMN_H1 = "h1";
     private static final String COLUMN_DESCRIPTION = "description";
+    private static final String TABLE_NAME = "url_checks";
 
     public UrlCheckRepository(DataSource dataSource) {
-        super(dataSource);
+        super(dataSource, TABLE_NAME);
     }
 
     public void save(UrlCheck urlCheck) throws SQLException {
         String sql = String.format(
                 "INSERT INTO %s (%s, %s, %s, %s, %s, %s) VALUES (?, ?, ?, ?, ?, ?)",
-                getTableName(), COLUMN_URL_ID, COLUMN_STATUS_CODE, COLUMN_TITLE, COLUMN_H1, COLUMN_DESCRIPTION,
+                this.getTableName(), COLUMN_URL_ID, COLUMN_STATUS_CODE, COLUMN_TITLE, COLUMN_H1, COLUMN_DESCRIPTION,
                 COLUMN_CREATED_AT);
         try (
                 Connection conn = getConnection();
@@ -111,10 +112,5 @@ public final class UrlCheckRepository extends BaseRepository<UrlCheck> {
                 resultSet.getTimestamp(COLUMN_CREATED_AT));
         urlCheck.assignId(resultSet.getLong(COLUMN_ID));
         return urlCheck;
-    }
-
-    @Override
-    public String getTableName() {
-        return "url_checks";
     }
 }
