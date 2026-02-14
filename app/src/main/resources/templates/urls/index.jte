@@ -31,7 +31,6 @@ content = @`
                     </td>
                     <td>
                         ${url.getLatestUrlCheck().map(c -> c.getCreatedAt()
-                            .toInstant()
                             .atZone(ZoneId.systemDefault())
                             .format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG))).orElse(null)}
                     </td>

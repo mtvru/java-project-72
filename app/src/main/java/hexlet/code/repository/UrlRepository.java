@@ -8,6 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +29,7 @@ public final class UrlRepository extends BaseRepository<Url> {
                 Connection conn = getConnection();
                 PreparedStatement preparedStatement = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             preparedStatement.setString(1, url.getName());
-            preparedStatement.setTimestamp(2, url.getCreatedAt());
+            preparedStatement.setTimestamp(2, Timestamp.from(url.getCreatedAt()));
             preparedStatement.executeUpdate();
             try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
@@ -59,7 +60,8 @@ public final class UrlRepository extends BaseRepository<Url> {
     protected Url mapRow(ResultSet resultSet) throws SQLException {
         Url url = new Url(
                 resultSet.getString(COLUMN_NAME),
-                resultSet.getTimestamp(COLUMN_CREATED_AT));
+                resultSet.getTimestamp(COLUMN_CREATED_AT).toInstant()
+        );
         url.assignId(resultSet.getLong(COLUMN_ID));
 
         return url;

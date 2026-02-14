@@ -25,7 +25,6 @@ content = @`
             <tr>
                 <td>Date of creation</td>
                 <td>${page.getUrl().getCreatedAt()
-                        .toInstant()
                         .atZone(ZoneId.systemDefault())
                         .format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG))}</td>
             </tr>
@@ -60,7 +59,6 @@ content = @`
                         <td>${check.getDescription()}</td>
                         <td>${
                             check.getCreatedAt()
-                                .toInstant()
                                 .atZone(ZoneId.systemDefault())
                                 .format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG))
                         }</td>

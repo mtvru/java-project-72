@@ -1,6 +1,7 @@
 package hexlet.code;
 
 import com.zaxxer.hikari.HikariDataSource;
+import hexlet.code.model.UrlCheck;
 import hexlet.code.repository.UrlCheckRepository;
 import hexlet.code.repository.UrlRepository;
 import lombok.AccessLevel;
@@ -10,6 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TestUtils {
@@ -45,5 +47,10 @@ public class TestUtils {
             }
         }
         throw new SQLException("Failed to insert test URL");
+    }
+
+    public static List<UrlCheck> findUrlChecksByUrlId(Long urlId) throws SQLException {
+        UrlCheckRepository urlCheckRepository = new UrlCheckRepository(DATA_SOURCE);
+        return urlCheckRepository.findByUrlId(urlId);
     }
 }

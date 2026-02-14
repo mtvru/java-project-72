@@ -7,8 +7,10 @@ import java.net.CookieManager;
 import java.sql.SQLException;
 import java.util.stream.Stream;
 import com.zaxxer.hikari.HikariDataSource;
+import hexlet.code.model.UrlCheck;
 import hexlet.code.util.FlashMessage;
 import hexlet.code.util.NamedRoutes;
+import java.util.List;
 import io.javalin.testtools.TestConfig;
 import mockwebserver3.MockResponse;
 import mockwebserver3.MockWebServer;
@@ -171,26 +173,13 @@ public final class AppTest {
                 assertThat(response.code()).isEqualTo(SC_OK);
                 assertThat(response.body().string()).contains(FlashMessage.PAGE_CHECKED.getMessage());
             }
-            try (Response response = client.get(NamedRoutes.urlPath(urlId))) {
-                String body = response.body().string();
-                Document doc = Jsoup.parse(body);
-                Element table = doc.select("table").get(1);
-                Elements rows = table.select("tbody tr");
-                Element firstRow = rows.getFirst();
-                assertThat(firstRow).isNotNull();
-                Elements tds = firstRow.select("td");
-                String statusCode = tds.get(1).text();
-                String title = tds.get(2).text();
-                final int h1Pos = 3;
-                String h1 = tds.get(h1Pos).text();
-                final int descriptionPos = 4;
-                String description = tds.get(descriptionPos).text();
-                assertThat(response.code()).isEqualTo(SC_OK);
-                assertThat(statusCode).isEqualTo(String.valueOf(expectedStatus));
-                assertThat(title).isEqualTo(expectedTitle);
-                assertThat(h1).isEqualTo(expectedH1);
-                assertThat(description).isEqualTo(expectedDescription);
-            }
+            List<UrlCheck> urlChecks = TestUtils.findUrlChecksByUrlId(urlId);
+            assertThat(urlChecks).hasSize(1);
+            UrlCheck actualUrlCheck = urlChecks.getFirst();
+            assertThat(actualUrlCheck.getStatusCode()).isEqualTo(expectedStatus);
+            assertThat(actualUrlCheck.getTitle()).isEqualTo(expectedTitle);
+            assertThat(actualUrlCheck.getH1()).isEqualTo(expectedH1);
+            assertThat(actualUrlCheck.getDescription()).isEqualTo(expectedDescription);
         });
         mockServer.close();
     }

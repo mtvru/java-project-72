@@ -2,7 +2,7 @@ package hexlet.code.model;
 
 import lombok.Getter;
 import lombok.ToString;
-import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -14,7 +14,7 @@ import java.util.Optional;
 public final class Url {
     private Long id;
     private final String name;
-    private final Timestamp createdAt;
+    private final Instant createdAt;
     private final List<UrlCheck> urlChecks = new ArrayList<>();
 
     public Url(String name) {
@@ -22,10 +22,10 @@ public final class Url {
             throw new IllegalArgumentException("Name must not be empty");
         }
         this.name = name;
-        this.createdAt = new Timestamp(System.currentTimeMillis());
+        this.createdAt = Instant.now();
     }
 
-    public Url(String name, Timestamp createdAt) {
+    public Url(String name, Instant createdAt) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Name must not be empty");
         }

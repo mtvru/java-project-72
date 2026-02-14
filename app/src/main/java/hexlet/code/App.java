@@ -5,12 +5,10 @@ package hexlet.code;
 
 import com.zaxxer.hikari.HikariDataSource;
 import io.javalin.Javalin;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public final class App {
-    private static final Logger LOG = LoggerFactory.getLogger(App.class);
-
     public static Javalin getApp() {
         HikariDataSource dataSource = HikariDataSourceFactory.create();
         try {
@@ -18,11 +16,11 @@ public final class App {
             Javalin app = JavalinFactory.createApp(dataSource);
             app.events(event -> {
                 event.serverStopped(() -> {
-                    LOG.info("Stopping HikariDataSource...");
+                    log.info("Stopping HikariDataSource...");
                     dataSource.close();
                 });
                 event.serverStopFailed(() -> {
-                    LOG.error("serverStopFailed stopping HikariDataSource...");
+                    log.error("serverStopFailed stopping HikariDataSource...");
                     dataSource.close();
                 });
             });
@@ -43,11 +41,11 @@ public final class App {
             app.start(AppConfig.getPort());
             Javalin finalApp = app;
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                LOG.info("Received shutdown signal, stopping app...");
+                log.info("Received shutdown signal, stopping app...");
                 finalApp.stop();
             }));
         } catch (Exception e) {
-            LOG.error("Fatal error: ", e);
+            log.error("Fatal error: ", e);
             if (app != null) {
                 app.stop();
             }

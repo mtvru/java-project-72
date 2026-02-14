@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,7 +48,7 @@ public final class UrlCheckRepository extends BaseRepository<UrlCheck> {
             preparedStatement.setString(pTitle, urlCheck.getTitle());
             preparedStatement.setString(pH1, urlCheck.getH1());
             preparedStatement.setString(pDescription, urlCheck.getDescription());
-            preparedStatement.setTimestamp(pCreatedAt, urlCheck.getCreatedAt());
+            preparedStatement.setTimestamp(pCreatedAt, Timestamp.from(urlCheck.getCreatedAt()));
             preparedStatement.executeUpdate();
 
             try (ResultSet generatedKeys = preparedStatement.getGeneratedKeys()) {
@@ -84,22 +85,27 @@ public final class UrlCheckRepository extends BaseRepository<UrlCheck> {
         if (urls.isEmpty()) {
             return Collections.emptyMap();
         }
-        String idList = urls.stream()
-                .map(url -> String.valueOf(url.getId()))
+        String placeholders = urls.stream()
+                .map(url -> "?")
                 .collect(Collectors.joining(", "));
         String sql = String.format(
                 "SELECT * FROM %s WHERE id IN (SELECT MAX(id) FROM %s GROUP BY %s) AND %s IN (%s)",
-                this.getTableName(), this.getTableName(), COLUMN_URL_ID, COLUMN_URL_ID, idList);
+                this.getTableName(), this.getTableName(), COLUMN_URL_ID, COLUMN_URL_ID, placeholders);
         try (
                 Connection conn = getConnection();
-                Statement stmt = conn.createStatement();
-                ResultSet resultSet = stmt.executeQuery(sql)) {
-            Map<Long, UrlCheck> result = new HashMap<>();
-            while (resultSet.next()) {
-                UrlCheck urlCheck = mapRow(resultSet);
-                result.put(urlCheck.getUrlId(), urlCheck);
+                PreparedStatement stmt = conn.prepareStatement(sql)
+        ) {
+            for (int i = 0; i < urls.size(); i++) {
+                stmt.setLong(i + 1, urls.get(i).getId());
             }
-            return result;
+            try (ResultSet resultSet = stmt.executeQuery()) {
+                Map<Long, UrlCheck> result = new HashMap<>();
+                while (resultSet.next()) {
+                    UrlCheck urlCheck = mapRow(resultSet);
+                    result.put(urlCheck.getUrlId(), urlCheck);
+                }
+                return result;
+            }
         }
     }
 
@@ -111,7 +117,8 @@ public final class UrlCheckRepository extends BaseRepository<UrlCheck> {
                 resultSet.getString(COLUMN_TITLE),
                 resultSet.getString(COLUMN_H1),
                 resultSet.getString(COLUMN_DESCRIPTION),
-                resultSet.getTimestamp(COLUMN_CREATED_AT));
+                resultSet.getTimestamp(COLUMN_CREATED_AT).toInstant()
+        );
         urlCheck.assignId(resultSet.getLong(COLUMN_ID));
         return urlCheck;
     }

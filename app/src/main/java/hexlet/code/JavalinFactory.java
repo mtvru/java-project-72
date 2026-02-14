@@ -5,21 +5,16 @@ import gg.jte.TemplateEngine;
 import gg.jte.resolve.ResourceCodeResolver;
 import hexlet.code.controller.HomeController;
 import hexlet.code.controller.UrlController;
-import hexlet.code.exception.DbConnectionException;
 import hexlet.code.repository.UrlCheckRepository;
 import hexlet.code.repository.UrlRepository;
 import hexlet.code.service.UrlService;
 import hexlet.code.util.NamedRoutes;
 import io.javalin.Javalin;
 import io.javalin.rendering.template.JavalinJte;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import javax.sql.DataSource;
 
 public class JavalinFactory {
     private static final String TEMPLATES_NAME = "templates";
-    private static final Logger LOG = LoggerFactory.getLogger(JavalinFactory.class);
-    private static final int SC_INTERNAL_SERVER_ERROR = 500;
 
     public static Javalin createApp(DataSource dataSource) {
         Javalin app = Javalin.create(config -> {
@@ -38,10 +33,6 @@ public class JavalinFactory {
         app.get(NamedRoutes.urlPath("{id}"), urlController::show);
         app.post(NamedRoutes.urlsPath(), urlController::create);
         app.post(NamedRoutes.urlChecksPath("{id}"), urlController::check);
-        app.exception(DbConnectionException.class, (e, ctx) -> {
-            LOG.error(e.getMessage(), e);
-            ctx.status(SC_INTERNAL_SERVER_ERROR).result("DB connection error.");
-        });
         return app;
     }
 

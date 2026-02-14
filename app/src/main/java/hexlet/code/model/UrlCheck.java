@@ -3,7 +3,7 @@ package hexlet.code.model;
 import lombok.Getter;
 import lombok.ToString;
 
-import java.sql.Timestamp;
+import java.time.Instant;
 
 @Getter
 @ToString
@@ -14,7 +14,7 @@ public final class UrlCheck {
     private final String h1;
     private final String description;
     private final Long urlId;
-    private final Timestamp createdAt;
+    private final Instant createdAt;
 
     public UrlCheck(Long urlId, Integer statusCode, String title, String h1, String description) {
         if (urlId == null) {
@@ -25,7 +25,7 @@ public final class UrlCheck {
         this.title = title;
         this.h1 = h1;
         this.description = description;
-        this.createdAt = new Timestamp(System.currentTimeMillis());
+        this.createdAt = Instant.now();
     }
 
     public UrlCheck(
@@ -34,7 +34,8 @@ public final class UrlCheck {
             String title,
             String h1,
             String description,
-            Timestamp createdAt) {
+            Instant createdAt
+    ) {
         if (urlId == null) {
             throw new IllegalArgumentException("UrlId is required");
         }
