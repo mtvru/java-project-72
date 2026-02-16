@@ -5,6 +5,7 @@ package hexlet.code;
 
 import com.zaxxer.hikari.HikariDataSource;
 import io.javalin.Javalin;
+import kong.unirest.Unirest;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -18,10 +19,12 @@ public final class App {
                 event.serverStopped(() -> {
                     log.info("Stopping HikariDataSource...");
                     dataSource.close();
+                    Unirest.shutDown();
                 });
                 event.serverStopFailed(() -> {
                     log.error("serverStopFailed stopping HikariDataSource...");
                     dataSource.close();
+                    Unirest.shutDown();
                 });
             });
             return app;
